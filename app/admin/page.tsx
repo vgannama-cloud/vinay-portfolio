@@ -122,12 +122,12 @@ function ProfileEditor() {
         <div>
           <label style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", color: "#6b687c", marginBottom: 8 }}>Profile Photo</label>
           <input type="file" accept="image/*" onChange={(e) => uploadFile(e, "photo_url", "profile-photo")} style={{ fontSize: 13, color: "#b0adc0" }} />
-          {profile.photo_url && <p style={{ fontSize: 11, color: "#c4a8ff", marginTop: 8 }}>Photo uploaded &#10003;</p>}
+          {(profile.photo_url as string) ? <p style={{ fontSize: 11, color: "#c4a8ff", marginTop: 8 }}>Photo uploaded &#10003;</p> : null}
         </div>
         <div>
           <label style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", color: "#6b687c", marginBottom: 8 }}>Resume (PDF)</label>
           <input type="file" accept=".pdf" onChange={(e) => uploadFile(e, "resume_url", "resume")} style={{ fontSize: 13, color: "#b0adc0" }} />
-          {profile.resume_url && <p style={{ fontSize: 11, color: "#c4a8ff", marginTop: 8 }}>Resume uploaded &#10003;</p>}
+          {(profile.resume_url as string) ? <p style={{ fontSize: 11, color: "#c4a8ff", marginTop: 8 }}>Resume uploaded &#10003;</p> : null}
         </div>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 16 }}>

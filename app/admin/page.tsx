@@ -115,17 +115,17 @@ function ProfileEditor() {
       <InputField label="GitHub URL" value={(profile.github as string) || ""} onChange={(v) => setProfile({ ...profile, github: v })} />
       <InputField label="LinkedIn URL" value={(profile.linkedin as string) || ""} onChange={(v) => setProfile({ ...profile, linkedin: v })} />
       <InputField label="Twitter URL" value={(profile.twitter as string) || ""} onChange={(v) => setProfile({ ...profile, twitter: v })} />
-      <InputField label="Skills (comma separated)" value={Array.isArray(profile.skills) ? (profile.skills as string[]).join(", ") : ""} onChange={(v) => setProfile({ ...profile, skills: v.split(",").map((s) => s.trim()).filter(Boolean) })} />
+      <InputField label="Skills (comma separated)" value={Array.isArray(profile.skills) ? (profile.skills as string[]).join(", ") : ""} onChange={(v) => setProfile({ ...profile, skills: v.split(",").map((s: string) => s.trim()) })} />
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 24 }}>
         <div>
           <label style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", color: "#6b687c", marginBottom: 8 }}>Profile Photo</label>
           <input type="file" accept="image/*" onChange={(e) => uploadFile(e, "photo_url", "profile-photo")} style={{ fontSize: 13, color: "#b0adc0" }} />
-          {(profile.photo_url as string) ? <p style={{ fontSize: 11, color: "#c4a8ff", marginTop: 8 }}>Photo uploaded &#10003;</p> : null}
+          {profile.photo_url && <p style={{ fontSize: 11, color: "#c4a8ff", marginTop: 8 }}>Photo uploaded &#10003;</p>}
         </div>
         <div>
           <label style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", color: "#6b687c", marginBottom: 8 }}>Resume (PDF)</label>
           <input type="file" accept=".pdf" onChange={(e) => uploadFile(e, "resume_url", "resume")} style={{ fontSize: 13, color: "#b0adc0" }} />
-          {(profile.resume_url as string) ? <p style={{ fontSize: 11, color: "#c4a8ff", marginTop: 8 }}>Resume uploaded &#10003;</p> : null}
+          {profile.resume_url && <p style={{ fontSize: 11, color: "#c4a8ff", marginTop: 8 }}>Resume uploaded &#10003;</p>}
         </div>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
@@ -179,7 +179,7 @@ function ExperiencesEditor() {
           </div>
         ))}
         <button onClick={() => setEditing({ ...editing, description: [...desc, ""] })} style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#c4a8ff", background: "none", border: "none", cursor: "pointer", marginBottom: 16 }}>+ Add bullet</button>
-        <InputField label="Tags (comma separated)" value={tags.join(", ")} onChange={(v) => setEditing({ ...editing, tags: v.split(",").map((s) => s.trim()).filter(Boolean) })} />
+        <InputField label="Tags (comma separated)" value={tags.join(", ")} onChange={(v) => setEditing({ ...editing, tags: v.split(",").map((s: string) => s.trim()) })} />
         <div style={{ marginBottom: 20 }}>
           <label style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", color: "#6b687c", marginBottom: 8 }}>Images</label>
           {images.length > 0 && (
@@ -248,7 +248,7 @@ function ProjectsEditor() {
           <InputField key={k} label={l} value={(editing[k] as string) || ""} onChange={(v) => setEditing({ ...editing, [k]: v })} />
         ))}
         <InputField label="Description" value={(editing.description as string) || ""} onChange={(v) => setEditing({ ...editing, description: v })} multiline />
-        <InputField label="Tags (comma separated)" value={tags.join(", ")} onChange={(v) => setEditing({ ...editing, tags: v.split(",").map((s) => s.trim()).filter(Boolean) })} />
+        <InputField label="Tags (comma separated)" value={tags.join(", ")} onChange={(v) => setEditing({ ...editing, tags: v.split(",").map((s: string) => s.trim()) })} />
         <InputField label="Sort Order" value={String((editing.sort_order as number) || 0)} onChange={(v) => setEditing({ ...editing, sort_order: parseInt(v) || 0 })} />
         <div style={{ display: "flex", gap: 12 }}>
           <button onClick={save} style={{ padding: "10px 28px", background: "rgba(196,168,255,0.15)", border: "1px solid rgba(196,168,255,0.25)", borderRadius: 8, color: "#fff", fontSize: 14, cursor: "pointer" }}>Save</button>
@@ -303,7 +303,7 @@ function CertificationsEditor() {
           <InputField key={k} label={l} value={(editing[k] as string) || ""} onChange={(v) => setEditing({ ...editing, [k]: v })} />
         ))}
         <InputField label="Description" value={(editing.description as string) || ""} onChange={(v) => setEditing({ ...editing, description: v })} multiline />
-        <InputField label="Skills (comma separated)" value={skills.join(", ")} onChange={(v) => setEditing({ ...editing, skills: v.split(",").map((s) => s.trim()).filter(Boolean) })} />
+        <InputField label="Skills (comma separated)" value={skills.join(", ")} onChange={(v) => setEditing({ ...editing, skills: v.split(",").map((s: string) => s.trim()) })} />
         <InputField label="Sort Order" value={String((editing.sort_order as number) || 0)} onChange={(v) => setEditing({ ...editing, sort_order: parseInt(v) || 0 })} />
         <div style={{ display: "flex", gap: 12 }}>
           <button onClick={save} style={{ padding: "10px 28px", background: "rgba(196,168,255,0.15)", border: "1px solid rgba(196,168,255,0.25)", borderRadius: 8, color: "#fff", fontSize: 14, cursor: "pointer" }}>Save</button>

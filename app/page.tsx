@@ -11,11 +11,12 @@ import AnimatedBackground from "./components/AnimatedBackground";
 export const revalidate = 60;
 
 async function getData() {
-  const [experiencesRes, projectsRes, profileRes, certsRes] = await Promise.all([
+  const [experiencesRes, projectsRes, profileRes, certsRes, eduRes] = await Promise.all([
     supabase.from("experiences").select("*").order("sort_order"),
     supabase.from("projects").select("*").order("sort_order"),
     supabase.from("profile").select("*").single(),
     supabase.from("certifications").select("*").order("sort_order"),
+    supabase.from("education").select("*").order("sort_order"),
   ]);
 
   return {
@@ -23,11 +24,12 @@ async function getData() {
     projects: projectsRes.data || [],
     profile: profileRes.data,
     certifications: certsRes.data || [],
+    education: eduRes.data || [],
   };
 }
 
 export default async function Home() {
-  const { experiences, projects, profile, certifications } = await getData();
+  const { experiences, projects, profile, certifications, education } = await getData();
 
   if (!profile) {
     return (
@@ -42,7 +44,7 @@ export default async function Home() {
       <AnimatedBackground />
       <Navbar resumeUrl={profile.resume_url} />
       <Hero profile={profile} />
-      <About profile={profile} />
+      <About profile={profile} education={education} />
       <Experience data={experiences} />
       <Projects data={projects} />
       <Certifications data={certifications} />

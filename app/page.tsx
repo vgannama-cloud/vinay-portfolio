@@ -11,12 +11,13 @@ import AnimatedBackground from "./components/AnimatedBackground";
 export const revalidate = 60;
 
 async function getData() {
-  const [experiencesRes, projectsRes, profileRes, certsRes, eduRes] = await Promise.all([
+  const [experiencesRes, projectsRes, profileRes, certsRes, eduRes, skillsRes] = await Promise.all([
     supabase.from("experiences").select("*").order("sort_order"),
     supabase.from("projects").select("*").order("sort_order"),
     supabase.from("profile").select("*").single(),
     supabase.from("certifications").select("*").order("sort_order"),
     supabase.from("education").select("*").order("sort_order"),
+    supabase.from("skills").select("*").order("sort_order"),
   ]);
 
   return {
@@ -25,11 +26,12 @@ async function getData() {
     profile: profileRes.data,
     certifications: certsRes.data || [],
     education: eduRes.data || [],
+    skillCategories: skillsRes.data || [],
   };
 }
 
 export default async function Home() {
-  const { experiences, projects, profile, certifications, education } = await getData();
+  const { experiences, projects, profile, certifications, education, skillCategories } = await getData();
 
   if (!profile) {
     return (
@@ -44,7 +46,7 @@ export default async function Home() {
       <AnimatedBackground />
       <Navbar resumeUrl={profile.resume_url} />
       <Hero profile={profile} />
-      <About profile={profile} education={education} />
+      <About profile={profile} education={education} skillCategories={skillCategories} />
       <Experience data={experiences} />
       <Projects data={projects} />
       <Certifications data={certifications} />

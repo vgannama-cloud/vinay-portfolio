@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 
-type Tab = "profile" | "experiences" | "projects" | "certifications" | "education";
+type Tab = "profile" | "experiences" | "projects" | "certifications" | "education" | "skills";
 
 export default function AdminPage() {
   const [user, setUser] = useState<unknown>(null);
@@ -18,6 +18,10 @@ export default function AdminPage() {
       setUser(data.user);
       setLoading(false);
     });
+
+    const handleUnload = () => { supabase.auth.signOut(); };
+    window.addEventListener("beforeunload", handleUnload);
+    return () => window.removeEventListener("beforeunload", handleUnload);
   }, [router]);
 
   const handleLogout = async () => {
@@ -33,6 +37,7 @@ export default function AdminPage() {
     { key: "projects", label: "Projects" },
     { key: "certifications", label: "Certifications" },
     { key: "education", label: "Education" },
+    { key: "skills", label: "Skills" },
   ];
 
   return (
@@ -60,6 +65,7 @@ export default function AdminPage() {
         {tab === "projects" && <ProjectsEditor />}
         {tab === "certifications" && <CertificationsEditor />}
         {tab === "education" && <EducationEditor />}
+        {tab === "skills" && <SkillsEditor />}
       </div>
     </div>
   );
@@ -122,12 +128,12 @@ function ProfileEditor() {
         <div>
           <label style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", color: "#6b687c", marginBottom: 8 }}>Profile Photo</label>
           <input type="file" accept="image/*" onChange={(e) => uploadFile(e, "photo_url", "profile-photo")} style={{ fontSize: 13, color: "#b0adc0" }} />
-          {profile.photo_url !== null && profile.photo_url !== undefined && profile.photo_url !== "" ? <p style={{ fontSize: 11, color: "#c4a8ff", marginTop: 8 }}>Photo uploaded &#10003;</p> : null}
+          {(profile.photo_url as string) ? <p style={{ fontSize: 11, color: "#c4a8ff", marginTop: 8 }}>Photo uploaded &#10003;</p> : null}
         </div>
         <div>
           <label style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", color: "#6b687c", marginBottom: 8 }}>Resume (PDF)</label>
           <input type="file" accept=".pdf" onChange={(e) => uploadFile(e, "resume_url", "resume")} style={{ fontSize: 13, color: "#b0adc0" }} />
-          {profile.resume_url !== null && profile.resume_url !== undefined && profile.resume_url !== "" ? <p style={{ fontSize: 11, color: "#c4a8ff", marginTop: 8 }}>Resume uploaded &#10003;</p> : null}
+          {(profile.resume_url as string) ? <p style={{ fontSize: 11, color: "#c4a8ff", marginTop: 8 }}>Resume uploaded &#10003;</p> : null}
         </div>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
@@ -391,3 +397,75 @@ function EducationEditor() {
   );
 }
 
+
+function SkillsEditor() {
+  const [items, setItems] = useState<Record<string, unknown>[]>([]);
+  const [editing, setEditing] = useState<Record<string, unknown> | null>(null);
+  const [msg, setMsg] = useState("");
+  const load = useCallback(async () => { const { data } = await supabase.from("skills").select("*").order("sort_order"); setItems(data || []); }, []);
+  useEffect(() => { load(); }, [load]);
+
+  const save = async () => {
+    if (!editing) return;
+    const toSave = { ...editing };
+    if (toSave._skillsRaw !== undefined) {
+      toSave.skills = (toSave._skillsRaw as string).split(",").map((s: string) => s.trim()).filter(Boolean);
+      delete toSave._skillsRaw;
+    }
+    if (!toSave.id) { await supabase.from("skills").insert([toSave]); } else { await supabase.from("skills").update(toSave).eq("id", toSave.id); }
+    setEditing(null); setMsg("Saved!"); load(); setTimeout(() => setMsg(""), 3000);
+  };
+  const remove = async (id: string) => { if (!confirm("Delete?")) return; await supabase.from("skills").delete().eq("id", id); load(); };
+
+  if (editing) {
+    const skills = Array.isArray(editing.skills) ? editing.skills as string[] : [];
+    return (
+      <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 16, padding: 32 }}>
+        <h2 style={{ fontSize: 20, fontWeight: 500, marginBottom: 24 }}>{editing.id ? "Edit" : "New"} Skill Category</h2>
+        <InputField label="Category Name (e.g. PROGRAMMING SKILLS)" value={(editing.category as string) || ""} onChange={(v) => setEditing({ ...editing, category: v })} />
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", color: "#6b687c", marginBottom: 6 }}>Skills (comma separated)</label>
+          <input
+            value={editing._skillsRaw !== undefined ? editing._skillsRaw as string : skills.join(", ")}
+            onChange={(e) => setEditing({ ...editing, _skillsRaw: e.target.value })}
+            style={{ width: "100%", padding: "10px 14px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, color: "#eae8f0", fontSize: 13, outline: "none" }}
+          />
+        </div>
+        <InputField label="Sort Order" value={String((editing.sort_order as number) || 0)} onChange={(v) => setEditing({ ...editing, sort_order: parseInt(v) || 0 })} />
+        <div style={{ display: "flex", gap: 12 }}>
+          <button onClick={save} style={{ padding: "10px 28px", background: "rgba(196,168,255,0.15)", border: "1px solid rgba(196,168,255,0.25)", borderRadius: 8, color: "#fff", fontSize: 14, cursor: "pointer" }}>Save</button>
+          <button onClick={() => setEditing(null)} style={{ padding: "10px 28px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, color: "#b0adc0", fontSize: 14, cursor: "pointer" }}>Cancel</button>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <h2 style={{ fontSize: 20, fontWeight: 500 }}>Skill Categories</h2>
+        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+          {msg && <span style={{ fontSize: 13, color: "#4ade80" }}>{msg}</span>}
+          <button onClick={() => setEditing({ category: "", skills: [], sort_order: items.length + 1 })} style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#c4a8ff", background: "rgba(196,168,255,0.1)", border: "1px solid rgba(196,168,255,0.2)", borderRadius: 8, padding: "8px 20px", cursor: "pointer" }}>+ Add Category</button>
+        </div>
+      </div>
+      {items.map((item) => (
+        <div key={item.id as string} style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: 20, marginBottom: 12 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <p style={{ fontWeight: 500, fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.1em" }}>{item.category as string}</p>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button onClick={() => setEditing({ ...item })} style={{ fontSize: 12, color: "#c4a8ff", background: "none", border: "1px solid rgba(196,168,255,0.2)", borderRadius: 6, padding: "6px 14px", cursor: "pointer" }}>Edit</button>
+              <button onClick={() => remove(item.id as string)} style={{ fontSize: 12, color: "#f87171", background: "none", border: "1px solid rgba(248,113,113,0.2)", borderRadius: 6, padding: "6px 14px", cursor: "pointer" }}>Delete</button>
+            </div>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {Array.isArray(item.skills) && (item.skills as string[]).map((s) => (
+              <span key={s} style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#b0adc0", background: "rgba(196,168,255,0.06)", border: "1px solid rgba(196,168,255,0.1)", borderRadius: 20, padding: "4px 12px" }}>{s}</span>
+            ))}
+            {(!item.skills || (item.skills as string[]).length === 0) && <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#3d3960", fontStyle: "italic" }}>No skills yet</span>}
+          </div>
+        </div>
+      ))}
+      {items.length === 0 && <p style={{ color: "#6b687c", fontSize: 14, textAlign: "center", padding: 40 }}>No skill categories yet.</p>}
+    </div>
+  );
+}

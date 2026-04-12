@@ -13,12 +13,9 @@ type EducationItem = {
   location: string | null; date: string; activities: string | null; sort_order: number;
 };
 
-const skillCategories = [
-  { label: "PROGRAMMING SKILLS", skills: ["Python", "Java", "JavaFX", "C", "R", "Data Visualization", "Statistical Data Analysis", "OOP"] },
-  { label: "AI & MACHINE LEARNING", skills: [] },
-  { label: "DEVELOPER TOOLS", skills: ["OpenCV", "Git/GitHub", "VS Code", "Docker", "IntelliJ", "PyCharm", "Claude Code"] },
-  { label: "SOFT SKILLS", skills: ["Event Management", "Leadership", "Event Planning", "Project Coordination", "Communication"] },
-];
+type SkillCategory = {
+  id: string; category: string; skills: string[]; sort_order: number;
+};
 
 function InteractiveCard({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -56,7 +53,7 @@ function SkillPill({ name }: { name: string }) {
   );
 }
 
-export default function About({ profile, education }: { profile: Profile; education: EducationItem[] }) {
+export default function About({ profile, education, skillCategories }: { profile: Profile; education: EducationItem[]; skillCategories: SkillCategory[] }) {
   const sentences = profile.about.split(". ");
   const mid = Math.ceil(sentences.length / 2);
   const p1 = sentences.slice(0, mid).join(". ") + ".";
@@ -64,15 +61,13 @@ export default function About({ profile, education }: { profile: Profile; educat
 
   return (
     <section id="about" style={{ padding: "40px 80px 100px", maxWidth: 1000, margin: "0 auto", position: "relative", zIndex: 1 }}>
-
       <InteractiveCard delay={0}>
         <h3 style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 500, color: "#eae8f0", marginBottom: 16 }}>About Me</h3>
         <p style={{ fontSize: 15, color: "#b0adc0", lineHeight: 1.8, marginBottom: 12 }}>{p1}</p>
         <p style={{ fontSize: 15, color: "#b0adc0", lineHeight: 1.8 }}>{p2}</p>
       </InteractiveCard>
 
-      <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-60px" }} transition={{ duration: 0.7 }}
-        style={{ marginTop: 48 }}>
+      <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-60px" }} transition={{ duration: 0.7 }} style={{ marginTop: 48 }}>
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 500, color: "#eae8f0", marginBottom: 32 }}>Education</h2>
       </motion.div>
 
@@ -83,9 +78,7 @@ export default function About({ profile, education }: { profile: Profile; educat
               <div>
                 <h3 style={{ fontSize: 17, fontWeight: 500, color: "#eae8f0", marginBottom: 4 }}>{edu.school}</h3>
                 <p style={{ fontSize: 14, color: "#b0adc0", marginBottom: 4 }}>{edu.degree}</p>
-                {edu.details && (
-                  <p style={{ fontSize: 14, fontWeight: 500, color: "#c4a8ff", marginBottom: 4 }}>{edu.details}</p>
-                )}
+                {edu.details && <p style={{ fontSize: 14, fontWeight: 500, color: "#c4a8ff", marginBottom: 4 }}>{edu.details}</p>}
                 {edu.location && <p style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#6b687c", marginTop: 4 }}>{edu.location}</p>}
                 {edu.activities && <p style={{ fontSize: 12, color: "#6b687c", marginTop: 8 }}>Activities: {edu.activities}</p>}
               </div>
@@ -95,14 +88,13 @@ export default function About({ profile, education }: { profile: Profile; educat
         ))}
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-60px" }} transition={{ duration: 0.7 }}
-        style={{ marginTop: 48 }}>
+      <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-60px" }} transition={{ duration: 0.7 }} style={{ marginTop: 48 }}>
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 500, color: "#eae8f0", marginBottom: 32 }}>Skills</h2>
       </motion.div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
         {skillCategories.map((cat, i) => (
-          <motion.div key={cat.label}
+          <motion.div key={cat.id}
             initial={{ opacity: 0, y: 24, filter: "blur(6px)" }}
             whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             viewport={{ once: true, margin: "-40px" }}
@@ -111,7 +103,7 @@ export default function About({ profile, education }: { profile: Profile; educat
             onMouseEnter={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
             onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)")}
           >
-            <p style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: "#6b687c", marginBottom: 16 }}>{cat.label}</p>
+            <p style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: "#6b687c", marginBottom: 16 }}>{cat.category}</p>
             {cat.skills.length > 0 ? (
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {cat.skills.map((s) => <SkillPill key={s} name={s} />)}

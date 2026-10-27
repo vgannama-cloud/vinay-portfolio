@@ -1,134 +1,189 @@
-# Vinay Gannamaneni — Portfolio
+# Vinay Gannamaneni · Portfolio
 
-A personal portfolio website built from scratch with modern web technologies, featuring scroll-triggered animations, interactive 3D cards, a flowing animated background, and a full admin panel for content management.
+My personal portfolio, built from scratch with Next.js and Supabase. Black and Purdue gold, a top-down F1 car that drives a circuit down the page as you scroll, and a private admin panel so every piece of content can be edited without touching code.
 
-🔗 **Live Site:** [vinay-portfolio](https://vinayg.dev)
+**Live site: [vinayg.dev](https://vinayg.dev)**
 
----
+![Portfolio preview](.github/preview.png)
 
-## Features
+## Highlights
 
-### Public Site
-- **Animated Background** — Canvas-based flowing ribbon animations with ambient gradient blobs
-- **Parallax Hero** — Name and photo move at different scroll speeds for depth
-- **Scroll-Triggered Reveals** — Sections fade in with blur-to-sharp effects as you scroll
-- **Interactive 3D Cards** — Education and about cards tilt in 3D following your cursor
-- **Image Lightbox** — Click experience images to view them in a popup with slide animations
-- **Image Carousels** — Arrow navigation and dot indicators on experience images
-- **Glassmorphic UI** — Frosted glass nav pill, buttons, and badges
-- **Categorized Skills Grid** — Skills organized into labeled categories with hover effects
-- **Resume Download** — One-click PDF download from nav bar and hero section
-- **Responsive Design** — Works on desktop and mobile
-- **Dark Theme** — Deep purple/indigo aesthetic
+### Public site
 
-### Admin Panel (`/admin/login`)
-- **Secure Authentication** — Email/password login via Supabase Auth
-- **Profile Editor** — Edit name, tagline, bio, social links, skills, upload photo and resume
-- **Experience Manager** — Add/edit/delete work experiences with bullet points, tags, and image galleries
-- **Project Manager** — Add/edit/delete projects with GitHub links, live demo links, tags, and status
-- **Education Editor** — Add/edit/delete education entries with location and activities
-- **Certifications Manager** — Add/edit/delete certifications with skills and descriptions
-- **Image Uploads** — Upload photos directly to Supabase Storage
+- **Scroll-linked F1 car**: a red #16 car drives an S-shaped circuit from the top of the page to a checkered finish at the bottom. Its position is a pure function of scroll distance, precomputed into 600 keyframes and run as a CSS scroll-driven animation on the compositor thread, so it never lags behind or jitters, even on aggressive scrolling. Browsers without `ScrollTimeline` fall back to a lightweight `requestAnimationFrame` handler.
+- **Layered road**: the track sits above the section panels but below the text, using stacking contexts (`isolation: isolate` plus z-index layers) rather than masking.
+- **Twinkling starfield**: a canvas background with a slight scroll parallax, sized to screen area so it stays light on phones.
+- **Flip-over project cards**: the front shows the date, title and description; hover (or tap on touch screens) to flip to the tech stack, screenshots and up to 3 custom-named links.
+- **Experience timeline**: each role has a bar on a shared timeline axis. Hovering a row smoothly expands it in place to show every bullet, with hover intent so passing the cursor over doesn't trigger it.
+- **Smooth in-page navigation** for every anchor link, and one-time reveal animations driven by a single `IntersectionObserver`.
+- **Performance-minded motion**: all hover effects animate only `transform` and `opacity`, and everything respects `prefers-reduced-motion`.
+- **Image lightbox**, a one-click resume download, and a responsive layout down to phone width.
 
----
+### Admin panel (`/admin`)
 
-## Tech Stack
+- Email and password sign-in through Supabase Auth, visually separate from the public site so it's never mistaken for it
+- Editors for profile, experience, projects, skills, education and certifications
+- Drag-and-drop reordering (keyboard arrows work too)
+- Photo, resume and screenshot uploads straight to Supabase Storage
+- Per-project "Visible on site" switch, card-corner picker and up to 3 named links
+- Live save status and a built-in setup check that shows the SQL to run if the database is missing a column
+
+## Tech stack
 
 | Layer | Technology |
-|-------|-----------|
-| **Framework** | Next.js 16 (App Router, TypeScript) |
-| **Styling** | Inline styles + Tailwind CSS |
-| **Animations** | Framer Motion |
-| **Database** | Supabase (PostgreSQL) |
-| **Auth** | Supabase Auth |
-| **Storage** | Supabase Storage |
-| **Deployment** | Vercel |
+| --- | --- |
+| Framework | Next.js 16 (App Router), React 19, TypeScript |
+| Styling | Hand-written CSS with design tokens, Tailwind CSS v4 |
+| Fonts | Instrument Serif, Geist, Geist Mono via `next/font` |
+| Animation | CSS scroll-driven animations (Web Animations API), Canvas 2D |
+| Database | Supabase (PostgreSQL) with Row Level Security |
+| Auth | Supabase Auth |
+| Storage | Supabase Storage |
+| Hosting | Vercel |
 
----
-
-## Project Structure
+## Project structure
 
 ```
 vinay-portfolio/
 ├── app/
 │   ├── admin/
-│   │   ├── login/
-│   │   │   └── page.tsx          # Admin login page
-│   │   └── page.tsx              # Admin dashboard (CRUD for all content)
+│   │   ├── login/page.tsx        # Admin sign-in
+│   │   └── page.tsx              # Admin dashboard (all editors)
 │   ├── components/
-│   │   ├── About.tsx             # About, education, and skills section
-│   │   ├── AnimatedBackground.tsx # Canvas flowing ribbon animation
-│   │   ├── Certifications.tsx    # Certifications and activities section
-│   │   ├── Experience.tsx        # Work experience with image carousels
-│   │   ├── Footer.tsx            # Footer
-│   │   ├── Hero.tsx              # Hero section with parallax photo
-│   │   ├── Navbar.tsx            # Glassmorphic navigation bar
-│   │   └── Projects.tsx          # Projects grid with 3D tilt cards
-│   ├── globals.css               # Global styles and CSS variables
-│   ├── layout.tsx                # Root layout with fonts
-│   └── page.tsx                  # Main page (data fetching)
+│   │   ├── RaceTrack.tsx         # Circuit and scroll-linked car
+│   │   ├── f1Car.ts              # Car artwork (SVG)
+│   │   ├── StarField.tsx         # Twinkling canvas background
+│   │   ├── Navbar.tsx
+│   │   ├── Hero.tsx
+│   │   ├── Stats.tsx
+│   │   ├── About.tsx
+│   │   ├── Experience.tsx        # Timeline rows that expand on hover
+│   │   ├── Projects.tsx          # Flip-over project cards
+│   │   ├── Skills.tsx
+│   │   ├── Certifications.tsx    # Education, certifications, leadership
+│   │   ├── Footer.tsx
+│   │   ├── Lightbox.tsx
+│   │   └── RevealObserver.tsx    # Scroll reveal animations
+│   ├── content.ts                # Static text not stored in the database
+│   ├── globals.css               # Design tokens and all styles
+│   ├── layout.tsx                # Root layout and fonts
+│   └── page.tsx                  # Home page (data fetching)
 ├── lib/
-│   └── supabase.ts               # Supabase client
-├── .env.local                    # Environment variables (not in repo)
+│   ├── supabase.ts               # Supabase client
+│   ├── types.ts                  # Shared data types
+│   └── resume.ts                 # Resume download helper
+├── .env.local                    # Environment variables (not committed)
 └── package.json
 ```
 
----
+## Running it locally
 
-## Getting Started
+**Prerequisites:** Node.js 20+, a Supabase project, and a Vercel account if you want to deploy.
 
-### Prerequisites
-- Node.js 18+
-- A Supabase account
-- A Vercel account (for deployment)
+1. **Clone and install**
 
-### 1. Clone the repo
-```bash
-git clone https://github.com/vgannama-cloud/vinay-portfolio.git
-cd vinay-portfolio
-```
+   ```bash
+   git clone https://github.com/vgannama-cloud/vinay-portfolio.git
+   cd vinay-portfolio
+   npm install
+   ```
 
-### 2. Install dependencies
-```bash
-npm install
-```
+2. **Add environment variables** in a `.env.local` file at the project root:
 
-### 3. Set up environment variables
-Create a `.env.local` file in the root:
-```
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
 
-### 4. Set up the database
-Run the SQL migrations in your Supabase SQL Editor to create the required tables:
-- `profile` — Bio, social links, skills, photo/resume URLs
-- `experiences` — Work history with descriptions, tags, and images
-- `projects` — Project cards with GitHub/live links
-- `education` — Education entries with location and activities
-- `certifications` — Certifications with skills
+3. **Create the database.** In Supabase, open **SQL Editor**, paste this and run it:
 
-### 5. Run locally
-```bash
-npm run dev
-```
-Open [http://localhost:3000](http://localhost:3000)
+   ```sql
+   create table profile (
+     id uuid primary key default gen_random_uuid(),
+     name text, tagline text, subtitle text, about text,
+     email text, github text, linkedin text, twitter text,
+     skills text[] default '{}',
+     photo_url text, resume_url text,
+     stats jsonb
+   );
 
-### 6. Deploy
-Push to GitHub and import into Vercel. Add your environment variables in the Vercel dashboard.
+   create table experiences (
+     id uuid primary key default gen_random_uuid(),
+     title text, company text, location text, duration text,
+     description text[] default '{}',
+     tags text[] default '{}',
+     images text[] default '{}',
+     sort_order int default 0
+   );
 
----
+   create table projects (
+     id uuid primary key default gen_random_uuid(),
+     title text, description text, category text, status text,
+     tags text[] default '{}',
+     link text, github text,
+     links jsonb default '[]',
+     images text[] default '{}',
+     visible boolean default true,
+     card_rank text, card_suit text,
+     sort_order int default 0
+   );
 
-## Admin Panel
+   create table skills (
+     id uuid primary key default gen_random_uuid(),
+     category text,
+     skills text[] default '{}',
+     sort_order int default 0
+   );
 
-Navigate to `/admin/login` and sign in with your Supabase Auth credentials. The admin panel provides full CRUD operations for all content sections — no code changes needed to update your portfolio.
+   create table education (
+     id uuid primary key default gen_random_uuid(),
+     school text, degree text, details text, location text,
+     date text, activities text,
+     sort_order int default 0
+   );
 
----
+   create table certifications (
+     id uuid primary key default gen_random_uuid(),
+     title text, issuer text, description text,
+     skills text[] default '{}',
+     date text,
+     sort_order int default 0
+   );
+
+   -- Anyone can read; only a signed-in user can change anything
+   do $$
+   declare t text;
+   begin
+     foreach t in array array['profile','experiences','projects','skills','education','certifications'] loop
+       execute format('alter table %I enable row level security', t);
+       execute format('create policy "public read" on %I for select using (true)', t);
+       execute format('create policy "admin write" on %I for all to authenticated using (true) with check (true)', t);
+     end loop;
+   end $$;
+
+   insert into profile (name) values ('Your Name');
+   ```
+
+   Then go to **Storage**, create a **public** bucket named `images`, and add a policy that lets authenticated users upload to it.
+
+4. **Create your admin login.** In **Authentication → Users**, add a user with an email and password. Then turn off public sign-ups under **Authentication → Sign In / Providers**, so you're the only one who can ever sign in.
+
+5. **Start the dev server**
+
+   ```bash
+   npm run dev
+   ```
+
+   Open [localhost:3000](http://localhost:3000) for the site and [localhost:3000/admin](http://localhost:3000/admin) for the admin panel.
+
+## Deploying
+
+Push to GitHub, import the repo into Vercel, and add the two environment variables in the Vercel project settings. Every push to `main` redeploys automatically. Content edits made in the admin panel appear on the live site within a minute, with no redeploy needed.
+
+## Editing content
+
+Almost everything is edited at `/admin`. The few pieces of static text that aren't in the database (the line above the name, the About quick facts, the default stats and the Leadership entries) live in `app/content.ts`.
 
 ## License
 
-This project is open source and available under the [MIT License](LICENSE).
-
----
-
-Built with ☕ and Next.js
+The code is available under the MIT License. You're welcome to learn from it or borrow techniques, but please don't reuse my personal content, photos or the site's overall design as your own portfolio.

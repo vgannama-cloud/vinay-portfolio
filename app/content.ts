@@ -4,7 +4,7 @@
 
 export const SITE = {
   eyebrow: "Purdue University · CS, Machine Intelligence · Class of ’29",
-  coords: "40.4237° N, 86.9212° W",
+  coords: `17°43'03.5"N 83°19'47.1"E`,
   egg: "Boiler up. Bear down.",
 };
 

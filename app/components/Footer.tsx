@@ -21,7 +21,7 @@ export default function Footer({ profile }: { profile: Profile }) {
       </div>
       <div className="foot">
         <p className="egg">© {year} Vinay Gannamaneni <span className="hid">· {SITE.egg}</span></p>
-        <p>{SITE.coords} · V2.0 · rebuilt</p>
+        <p>{SITE.coords} · v2.0 · rebuilt</p>
         <a className="nl" href="#top">Back to top ↑</a>
       </div>
     </footer>

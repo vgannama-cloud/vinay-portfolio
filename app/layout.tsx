@@ -1,20 +1,22 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display, JetBrains_Mono } from "next/font/google";
+import { Instrument_Serif, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+const display = Instrument_Serif({
+  variable: "--font-display",
+  weight: "400",
+  style: ["normal", "italic"],
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const body = Geist({
   variable: "--font-body",
   subsets: ["latin"],
   display: "swap",
 });
 
-const playfair = Playfair_Display({
-  variable: "--font-display",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const jetbrains = JetBrains_Mono({
+const mono = Geist_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
   display: "swap",
@@ -22,10 +24,10 @@ const jetbrains = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "Vinay Gannamaneni",
-  description: "Computer Science (Machine Intelligence) @ Purdue | Data Science | Management Minor",
+  description: "Computer Science (Machine Intelligence) @ Purdue | Data Science | Mathematics & Management Minors",
   openGraph: {
     title: "Vinay Gannamaneni",
-    description: "Not just how to build it — but why, and for whom.",
+    description: "Analytical pipelines, ML applications and software that holds up on messy, real-world data.",
     type: "website",
   },
 };
@@ -38,8 +40,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${playfair.variable} ${jetbrains.variable}`}
+      className={`${display.variable} ${body.variable} ${mono.variable}`}
+      suppressHydrationWarning
     >
+      <head>
+        {/* Lets CSS hide scroll-reveal elements only when JavaScript is running */}
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+      </head>
       <body>{children}</body>
     </html>
   );

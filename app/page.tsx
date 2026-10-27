@@ -1,12 +1,17 @@
 import { supabase } from "@/lib/supabase";
+import type { Profile, ExperienceItem, ProjectItem, CertItem, EducationItem, SkillCategory } from "@/lib/types";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
+import Stats from "./components/Stats";
 import About from "./components/About";
 import Experience from "./components/Experience";
 import Projects from "./components/Projects";
+import Skills from "./components/Skills";
 import Certifications from "./components/Certifications";
 import Footer from "./components/Footer";
-import AnimatedBackground from "./components/AnimatedBackground";
+import StarField from "./components/StarField";
+import RaceTrack from "./components/RaceTrack";
+import RevealObserver from "./components/RevealObserver";
 
 export const revalidate = 60;
 
@@ -21,12 +26,12 @@ async function getData() {
   ]);
 
   return {
-    experiences: experiencesRes.data || [],
-    projects: projectsRes.data || [],
-    profile: profileRes.data,
-    certifications: certsRes.data || [],
-    education: eduRes.data || [],
-    skillCategories: skillsRes.data || [],
+    experiences: (experiencesRes.data || []) as ExperienceItem[],
+    projects: ((projectsRes.data || []) as ProjectItem[]).filter((p) => p.visible !== false),
+    profile: profileRes.data as Profile | null,
+    certifications: (certsRes.data || []) as CertItem[],
+    education: (eduRes.data || []) as EducationItem[],
+    skillCategories: (skillsRes.data || []) as SkillCategory[],
   };
 }
 
@@ -36,21 +41,27 @@ export default async function Home() {
   if (!profile) {
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <p style={{ fontFamily: "var(--font-mono)", color: "#6b687c" }}>Loading...</p>
+        <p className="mono" style={{ color: "var(--muted)" }}>Loading...</p>
       </div>
     );
   }
 
   return (
-    <main>
-      <AnimatedBackground />
+    <>
+      <StarField />
       <Navbar resumeUrl={profile.resume_url} />
-      <Hero profile={profile} />
-      <About profile={profile} education={education} skillCategories={skillCategories} />
-      <Experience data={experiences} />
-      <Projects data={projects} />
-      <Certifications data={certifications} />
-      <Footer />
-    </main>
+      <main className="site">
+        <RaceTrack />
+        <Hero profile={profile} />
+        <Stats stats={profile.stats} />
+        <About profile={profile} />
+        <Experience data={experiences} />
+        <Projects data={projects} />
+        <Skills data={skillCategories} />
+        <Certifications education={education} certifications={certifications} />
+        <Footer profile={profile} />
+      </main>
+      <RevealObserver />
+    </>
   );
 }

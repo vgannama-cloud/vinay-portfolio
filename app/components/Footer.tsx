@@ -1,17 +1,29 @@
-"use client";
+import type { Profile } from "@/lib/types";
+import { SITE } from "../content";
 
-import { motion } from "framer-motion";
-
-export default function Footer() {
+export default function Footer({ profile }: { profile: Profile }) {
   const year = new Date().getFullYear();
+  const links = [
+    profile.email && { label: profile.email, href: "mailto:" + profile.email, external: false },
+    profile.linkedin && { label: "LinkedIn", href: profile.linkedin, external: true },
+    profile.github && { label: "GitHub", href: profile.github, external: true },
+  ].filter(Boolean) as { label: string; href: string; external: boolean }[];
+
   return (
-    <motion.footer initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.6 }}
-      style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "36px 80px", maxWidth: 1000, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative", zIndex: 1 }}>
-      <p style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#6b687c" }}>&#169; {year} Vinay Gannamaneni</p>
-      <a href="#" style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#6b687c", textDecoration: "none", transition: "color 0.3s" }}
-        onMouseEnter={(e) => (e.currentTarget.style.color = "#c4a8ff")}
-        onMouseLeave={(e) => (e.currentTarget.style.color = "#6b687c")}
-      >Back to top &#8593;</a>
-    </motion.footer>
+    <footer id="contact" className="wrap section">
+      <h2 className="talk" data-reveal="">Let’s <em>talk.</em></h2>
+      <div className="contact-links" data-reveal="" style={{ "--d": "0.1s" } as React.CSSProperties}>
+        {links.map((l) => (
+          <a key={l.label} className="nl" href={l.href} target={l.external ? "_blank" : undefined} rel="noopener noreferrer">
+            {l.label} {l.external && <span className="ar">↗</span>}
+          </a>
+        ))}
+      </div>
+      <div className="foot">
+        <p className="egg">© {year} Vinay Gannamaneni <span className="hid">· {SITE.egg}</span></p>
+        <p>{SITE.coords} · build 16</p>
+        <a className="nl" href="#top">Back to top ↑</a>
+      </div>
+    </footer>
   );
 }

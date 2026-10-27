@@ -1,70 +1,119 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState } from "react";
+import type { ProjectItem } from "@/lib/types";
+import { cardFor } from "../content";
+import Lightbox from "./Lightbox";
 
-type ProjectItem = {
-  id: string; title: string; description: string; tags: string[];
-  category: string; status: string | null; link: string | null; github: string | null;
-};
+// Up to 3 named links per project (set in the admin panel). Projects that haven't been
+// re-saved yet fall back to the old GitHub (comma-separated) and Live site fields.
+function linksFor(p: ProjectItem) {
+  if (p.links && p.links.length) {
+    return p.links.filter((l) => l.url).slice(0, 3).map((l) => ({ href: l.url, label: l.label || "Link" }));
+  }
+  const urls = (p.github || "").split(/[\s,]+/).map((s) => s.trim()).filter(Boolean);
+  const out = urls.map((href) => ({
+    href,
+    label: urls.length > 1 ? href.replace(/\/+$/, "").split("/").pop() || "GitHub" : "GitHub",
+  }));
+  if (p.link) out.push({ href: p.link, label: "Live site" });
+  return out.slice(0, 3);
+}
 
 export default function Projects({ data }: { data: ProjectItem[] }) {
+  const [viewer, setViewer] = useState<{ images: string[]; index: number } | null>(null);
+  const [flipped, setFlipped] = useState<string | null>(null);
+
+  // Touch screens have no hover, so a tap flips the card instead
+  const tapFlip = (id: string, e: React.MouseEvent) => {
+    if (!window.matchMedia("(hover: none)").matches) return;
+    if ((e.target as HTMLElement).closest("a, button")) return;
+    setFlipped((cur) => (cur === id ? null : id));
+  };
+
   return (
-    <section id="projects" style={{ padding: "100px 80px", maxWidth: 1000, margin: "0 auto", position: "relative", zIndex: 1 }}>
-      <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.7 }}>
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 500, color: "#eae8f0", marginBottom: 48 }}>Projects</h2>
-      </motion.div>
-      {data.length === 0 ? (
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}
-          style={{ border: "1px dashed rgba(255,255,255,0.08)", borderRadius: 16, padding: 56, textAlign: "center", background: "rgba(255,255,255,0.02)" }}>
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: "#6b687c" }}>Projects coming soon &#8212; check back later.</p>
-        </motion.div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-          {data.map((project, i) => (
-            <motion.div key={project.id}
-              initial={{ opacity: 0, y: 30, filter: "blur(6px)" }}
-              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
-              style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: 16, padding: 28, transition: "all 0.3s" }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(196,168,255,0.15)"; e.currentTarget.style.background = "rgba(255,255,255,0.03)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.05)"; e.currentTarget.style.background = "rgba(255,255,255,0.02)"; }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#6b687c" }}>{project.category}</span>
-                {project.status && <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#c4a8ff", border: "1px solid rgba(196,168,255,0.2)", borderRadius: 20, padding: "2px 10px" }}>{project.status}</span>}
-              </div>
-              <h3 style={{ fontSize: 18, fontWeight: 500, color: "#eae8f0", marginBottom: 12 }}>{project.title}</h3>
-              <p style={{ fontSize: 13, color: "#9d99b8", lineHeight: 1.7, marginBottom: 20 }}>{project.description}</p>
+    <section id="projects" className="wrap section">
+      <h2 className="h2" data-reveal="" style={{ marginBottom: 32 }}>Projects</h2>
+      <div className="projects">
+        {data.map((p, i) => {
+          const auto = cardFor(i);
+          const rank = p.card_rank || auto.rank;
+          const suit = p.card_suit || auto.suit;
+          const tags = (p.tags || []).filter(Boolean);
+          const images = (p.images || []).filter(Boolean);
+          const links = linksFor(p);
+          return (
+            <div key={p.id} data-reveal="" style={{ "--d": `${Math.min(i, 3) * 0.08}s` } as React.CSSProperties}>
+              <div className={"pcard" + (flipped === p.id ? " flipped" : "")} onClick={(e) => tapFlip(p.id, e)}>
+                <div className="pcard-in">
+                  {/* Front: date, title, description */}
+                  <article className="pc pc-front">
+                    <div className="pc-top">
+                      <span className="corner" aria-hidden="true">{rank}<br />{suit}</span>
+                      {p.category && <span className="pc-meta">{p.category}</span>}
+                    </div>
+                    <h3>{p.title}</h3>
+                    {p.status && <span className="status">{p.status}</span>}
+                    <p className="desc">{p.description}</p>
+                    <span className="flip-hint mono" aria-hidden="true">
+                      <span className="on-hover">Hover for stack &amp; links ↻</span>
+                      <span className="on-touch">Tap for stack &amp; links ↻</span>
+                    </span>
+                  </article>
 
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: project.github || project.link ? 20 : 0 }}>
-                {project.tags.map((tag) => (
-                  <span key={tag} style={{ fontFamily: "var(--font-mono)", fontSize: 10, textTransform: "uppercase", color: "#6b687c", background: "rgba(196,168,255,0.06)", border: "1px solid rgba(196,168,255,0.1)", borderRadius: 20, padding: "3px 10px" }}>{tag}</span>
-                ))}
-              </div>
-
-              {(project.github || project.link) && (
-                <div style={{ display: "flex", gap: 10 }}>
-                  {project.github && (
-                    <a href={project.github} target="_blank" rel="noopener noreferrer"
-                      style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#b0adc0", textDecoration: "none", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, padding: "7px 16px", transition: "all 0.3s", display: "inline-flex", alignItems: "center", gap: 6 }}
-                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(196,168,255,0.25)"; e.currentTarget.style.color = "#fff"; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; e.currentTarget.style.color = "#b0adc0"; }}
-                    >GitHub &#8599;</a>
-                  )}
-                  {project.link && (
-                    <a href={project.link} target="_blank" rel="noopener noreferrer"
-                      style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#b0adc0", textDecoration: "none", background: "rgba(196,168,255,0.06)", border: "1px solid rgba(196,168,255,0.15)", borderRadius: 8, padding: "7px 16px", transition: "all 0.3s", display: "inline-flex", alignItems: "center", gap: 6 }}
-                      onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(196,168,255,0.12)"; e.currentTarget.style.color = "#fff"; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(196,168,255,0.06)"; e.currentTarget.style.color = "#b0adc0"; }}
-                    >Live Demo &#8599;</a>
-                  )}
+                  {/* Back: tech stack, screenshots, links */}
+                  <div className="pc pc-back">
+                    <span className="wm" aria-hidden="true">{suit}</span>
+                    <div className="pc-top">
+                      <span className="corner" aria-hidden="true">{rank}<br />{suit}</span>
+                      <span className="pc-meta">{p.title}</span>
+                    </div>
+                    {tags.length > 0 && (
+                      <div>
+                        <p className="eyebrow" style={{ marginBottom: 12 }}>Tech stack</p>
+                        <ul className="stack">
+                          {tags.map((t) => <li key={t} className="chip">{t}</li>)}
+                        </ul>
+                      </div>
+                    )}
+                    {images.length > 0 && (
+                      <button type="button" className="shot" onClick={() => setViewer({ images, index: 0 })} aria-label={`Open screenshots for ${p.title}`}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={images[0]} alt="" loading="lazy" />
+                        {images.length > 1 && <span className="shot-count mono">+{images.length - 1}</span>}
+                      </button>
+                    )}
+                    {links.length > 0 && (
+                      <div className="pc-links">
+                        {links.map((l, k) => (
+                          <a key={l.href + k} className={"nl" + (k === 0 ? " gold" : "")} href={l.href} target="_blank" rel="noopener noreferrer">{l.label} <span className="ar">↗</span></a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
-            </motion.div>
-          ))}
-        </div>
-      )}
+              </div>
+            </div>
+          );
+        })}
+
+        {data.length < 3 && (
+          <div data-reveal="" style={{ "--d": `${Math.min(data.length, 3) * 0.08}s` } as React.CSSProperties}>
+            <div className="flip" tabIndex={0} aria-label="Next project, in the works">
+              <div className="flip-in">
+                <div className="face front" aria-hidden="true"><span>NEXT PROJECT · HOVER</span></div>
+                <div className="face back">
+                  <span className="mono" style={{ fontSize: 12, letterSpacing: "0.1em", color: "var(--accent)" }}>IN THE WORKS</span>
+                  <span className="serif" style={{ fontSize: 40, lineHeight: 1.05 }}>Something new is on the grid.</span>
+                  <span style={{ fontSize: 14, color: "var(--muted)" }}>Check back soon, or ask me what I’m building.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {viewer && <Lightbox images={viewer.images} startIndex={viewer.index} onClose={() => setViewer(null)} />}
     </section>
   );
 }

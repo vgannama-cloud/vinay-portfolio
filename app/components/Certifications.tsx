@@ -1,122 +1,64 @@
-"use client";
+import type { CertItem, EducationItem } from "@/lib/types";
+import { ACTIVITIES } from "../content";
 
-import { motion } from "framer-motion";
-
-type CertItem = {
-  id: string;
-  title: string;
-  issuer: string;
-  description: string | null;
-  skills: string[];
-  date: string | null;
-};
-
-const activities = [
-  {
-    title: "Student Council Representative",
-    org: "Silver Oaks International School",
-    duration: "Jul 2023 \u2014 Apr 2025",
-    description: [
-      "Coordinated 13+ school-wide initiatives and events, managing communication between students and faculty.",
-      "Led 6+ peer teams to execute large-scale student activities and resolve operational issues.",
-    ],
-  },
-  {
-    title: "BITS Model United Nations \u2014 Delegate",
-    org: "BITS Pilani",
-    duration: "Nov 2024",
-    description: [
-      "Developed advanced public speaking and negotiation techniques through structured debates on international policy.",
-      "Analyzed complex global issues to draft resolution papers and lead diplomatic caucuses.",
-    ],
-  },
-];
-
-export default function Certifications({ data }: { data: CertItem[] }) {
+// Education, certifications and activities, laid out as two columns of rows
+export default function Certifications({ education, certifications }: { education: EducationItem[]; certifications: CertItem[] }) {
   return (
-    <section id="certifications" style={{ padding: "100px 80px", maxWidth: 1000, margin: "0 auto", position: "relative", zIndex: 1 }}>
-      {/* Certifications */}
-      <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.7 }}>
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 500, color: "#eae8f0", marginBottom: 40 }}>Certifications</h2>
-      </motion.div>
+    <section id="background" className="wrap section">
+      <div className="cols">
+        <div data-reveal="">
+          <h2 className="h2" style={{ marginBottom: 24 }}>Education</h2>
+          <div className="mini">
+            {education.map((e) => (
+              <div key={e.id} className="mini-row">
+                <div className="top">
+                  <h3>{e.school}</h3>
+                  <span className="when">{e.date}</span>
+                </div>
+                <p className="sub">{e.degree}{e.location ? ` · ${e.location}` : ""}</p>
+                {e.details && <p className="gold">{e.details}</p>}
+                {e.activities && <p className="sub">Activities: {e.activities}</p>}
+              </div>
+            ))}
+          </div>
 
-      {data.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
-          whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          style={{ border: "1px dashed rgba(255,255,255,0.08)", borderRadius: 16, padding: 48, textAlign: "center", background: "rgba(255,255,255,0.02)", marginBottom: 80 }}
-        >
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: "#6b687c" }}>Certifications coming soon.</p>
-        </motion.div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 80 }}>
-          {data.map((cert, i) => (
-            <motion.div key={cert.id}
-              initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
-              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
-              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 16, padding: 28, transition: "border-color 0.3s" }}
-              onMouseEnter={(e) => (e.currentTarget.style.borderColor = "rgba(196,168,255,0.15)")}
-              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)")}
-            >
-              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-                <div style={{ display: "flex", alignItems: "flex-start", gap: 20 }}>
-                  <div style={{ width: 48, height: 48, borderRadius: 10, background: "rgba(196,168,255,0.08)", border: "1px solid rgba(196,168,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <span style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 500, color: "#c4a8ff" }}>{cert.issuer.charAt(0)}</span>
-                  </div>
-                  <div>
-                    <h3 style={{ fontSize: 17, fontWeight: 500, color: "#eae8f0", marginBottom: 4 }}>{cert.title}</h3>
-                    <p style={{ fontSize: 13, color: "#b0adc0", marginBottom: cert.description ? 12 : 0 }}>{cert.issuer}</p>
-                    {cert.description && <p style={{ fontSize: 13, color: "#9d99b8", lineHeight: 1.7, marginBottom: cert.skills.length > 0 ? 14 : 0 }}>{cert.description}</p>}
-                    {cert.skills.length > 0 && (
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                        {cert.skills.map((s) => (
-                          <span key={s} style={{ fontFamily: "var(--font-mono)", fontSize: 10, textTransform: "uppercase", color: "#b0adc0", background: "rgba(196,168,255,0.06)", border: "1px solid rgba(196,168,255,0.1)", borderRadius: 20, padding: "4px 12px" }}>{s}</span>
-                        ))}
-                      </div>
+          {certifications.length > 0 && (
+            <>
+              <h2 className="h2" style={{ margin: "64px 0 24px" }}>Certifications</h2>
+              <div className="mini">
+                {certifications.map((c) => (
+                  <div key={c.id} className="mini-row">
+                    <div className="top">
+                      <h3>{c.title}</h3>
+                      {c.date && <span className="when">{c.date}</span>}
+                    </div>
+                    <p className="sub">{c.issuer}</p>
+                    {c.description && <p className="sub">{c.description}</p>}
+                    {c.skills?.filter(Boolean).length > 0 && (
+                      <div className="tags">{c.skills.filter(Boolean).map((s) => <span key={s} className="tag">{s}</span>)}</div>
                     )}
                   </div>
-                </div>
-                {cert.date && <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#6b687c", whiteSpace: "nowrap", marginLeft: 16 }}>{cert.date}</span>}
+                ))}
               </div>
-            </motion.div>
-          ))}
+            </>
+          )}
         </div>
-      )}
 
-      {/* Activities */}
-      <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.7 }}>
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 500, color: "#eae8f0", marginBottom: 32 }}>Activities</h2>
-      </motion.div>
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-        {activities.map((activity, i) => (
-          <motion.div key={i}
-            initial={{ opacity: 0, y: 24, filter: "blur(6px)" }}
-            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            viewport={{ once: true, margin: "-40px" }}
-            transition={{ duration: 0.5, delay: i * 0.1 }}
-            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 16, padding: 28, transition: "border-color 0.3s" }}
-            onMouseEnter={(e) => (e.currentTarget.style.borderColor = "rgba(196,168,255,0.15)")}
-            onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)")}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
-              <h3 style={{ fontSize: 17, fontWeight: 500, color: "#eae8f0" }}>{activity.title}</h3>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#6b687c", whiteSpace: "nowrap", marginLeft: 20 }}>{activity.duration}</span>
-            </div>
-            <p style={{ fontSize: 13, color: "#b0adc0", marginBottom: 16 }}>{activity.org}</p>
-            <ul style={{ listStyle: "none" }}>
-              {activity.description.map((line, j) => (
-                <li key={j} style={{ fontSize: 13, color: "#9d99b8", lineHeight: 1.7, paddingLeft: 14, position: "relative", marginBottom: 8 }}>
-                  <span style={{ position: "absolute", left: 0, color: "#3a3660" }}>&bull;</span>{line}
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-        ))}
+        <div data-reveal="" style={{ "--d": "0.1s" } as React.CSSProperties}>
+          <h2 className="h2" style={{ marginBottom: 24 }}>Leadership</h2>
+          <div className="mini">
+            {ACTIVITIES.map((a) => (
+              <div key={a.title} className="mini-row">
+                <div className="top">
+                  <h3>{a.title}</h3>
+                  <span className="when">{a.duration}</span>
+                </div>
+                <p className="sub">{a.org}</p>
+                <ul>{a.description.map((d, i) => <li key={i}>{d}</li>)}</ul>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );

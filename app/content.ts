@@ -16,7 +16,7 @@ export const QUICK_FACTS: { label: string; value: string; muted?: boolean }[] = 
   { label: "Concentration", value: "Machine Intelligence" },
   { label: "Minors", value: "Mathematics, Management" },
   { label: "Certificate", value: "Applications in Data Science" },
-  { label: "Off the clock", value: "Race weekends, card nights, football Sundays", muted: true },
+  { label: "Off the clock", value: "Race weekends, football Sundays, badminton nights", muted: true },
 ];
 
 // Headline numbers under the hero. If you add a `stats` column to the
